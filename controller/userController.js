@@ -7,28 +7,22 @@ const userController = {
     User.find()
       .select("-__v")
       .then((dbUserData) => {
-        console.log(dbUserData)
         res.json(dbUserData);
       })
       .catch((err) => {
-        console.log(err);
         res.status(500).json(err);
       });
   },
 
   //get a single user by _id
-  getUserById({ params }, res) {
+  getOneUser({ params }, res) {
     User.findOne({ _id: params.id })
-      .populate({
-        path: "thoughts", //pulls in thought data
-        path: "friends", //pulls in friend data
-        select: "-__v", // does not include the --v field when querying
-      })
+      .populate('friends')
+      .populate('thoughts')
       .select("-__v")
       .then((dbUserData) => {
         if (!dbUserData) {
-          res.status(404).json({ message: "No user found with this id" });
-          return;
+          return res.status(404).json({ message: "No user found with this id" });
         }
         res.json(dbUserData);
       })
@@ -54,8 +48,7 @@ const userController = {
     User.findOneAndUpdate({ _id: params.id }, body, { new: true, runValidators: true })
       .then((dbUserData) => {
         if (!dbUserData) {
-          res.status(404).json({ message: "No user found with this id" });
-          return;
+          return res.status(404).json({ message: "No user found with this id" });
         }
         res.json(dbUserData);
       })
@@ -70,8 +63,7 @@ const userController = {
     User.findOneAndDelete({ _id: params.id })
       .then((dbUserData) => {
         if (!dbUserData) {
-          res.status(404).json({ message: "No user found with this id!" });
-          return;
+          return res.status(404).json({ message: "No user found with this id" });
         }
         res.json({ message: 'User successfully deleted!' });
       })
